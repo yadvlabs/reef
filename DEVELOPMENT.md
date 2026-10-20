@@ -132,7 +132,7 @@ and runs in CI after the unit tests.
 ```sh
 make build          # static release binaries for linux/arm64 and linux/amd64 into bin/linux-<arch>/ (web UI embedded)
 make build-native   # release binary for this machine into bin/host/
-make release VERSION=v0.1.1   # the two tarballs plus SHA256SUMS under dist/
+make release VERSION=v0.1.2   # the two tarballs plus SHA256SUMS under dist/
 make image          # container image for this machine's architecture
 make image-push IMAGE=yadvlabs/reef:0.1.0   # multi-arch image built with buildx and pushed
 ```

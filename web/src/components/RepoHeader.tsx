@@ -1,14 +1,15 @@
-import { ActionList, ActionMenu, Button, Dialog, FormControl, TextInput, UnderlineNav } from '@primer/react';
-import { CodeIcon, IssueOpenedIcon, GitPullRequestIcon, PlayIcon, TableIcon, BookIcon, GearIcon, GraphIcon, ShieldIcon, EyeIcon, RepoForkedIcon, StarIcon, StarFillIcon, BellSlashIcon, TriangleDownIcon } from '@primer/octicons-react';
+import { ActionList, ActionMenu, Button, Dialog, FormControl, Label, TextInput, UnderlineNav } from '@primer/react';
+import { CodeIcon, IssueOpenedIcon, GitPullRequestIcon, PlayIcon, TableIcon, BookIcon, GearIcon, GraphIcon, ShieldIcon, EyeIcon, RepoForkedIcon, RepoIcon, StarIcon, StarFillIcon, BellSlashIcon, TriangleDownIcon } from '@primer/octicons-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate, useRouterState } from '@tanstack/react-router';
+import { Link, useNavigate, useRouterState } from '@tanstack/react-router';
 import { useState } from 'react';
 import { api, type Repo } from '../lib/api';
 import { useSession } from '../lib/session';
 import { UnderlineNavLink } from './links';
 
-/// The repository navigation row. The repository name itself lives in the global header, as
-/// on GitHub; this row carries the tabs and the watch/fork/star actions.
+/// The repository header, as on GitHub: the name with its visibility label and the
+/// watch/fork/star actions on one row, the tabs below. The global header carries the
+/// owner/name breadcrumb as well.
 export function RepoHeader({ repo }: { repo: Repo }) {
   const path = useRouterState({ select: (s) => s.location.pathname });
   const base = `/${repo.owner.login}/${repo.name}`;
@@ -29,17 +30,32 @@ export function RepoHeader({ repo }: { repo: Repo }) {
   ];
   return (
     <div className="repo-header">
+      <div className="title">
+        <span className="repo-icon">
+          <RepoIcon size={16} />
+        </span>
+        <Link to="/$owner/$repo" params={p} className="name">
+          {repo.name}
+        </Link>
+        <Label className="visibility" variant="secondary">
+          {repo.private ? 'Private' : 'Public'}
+        </Label>
+        {repo.archived ? <Label variant="attention">Archived</Label> : null}
+        {repo.is_template ? <Label variant="secondary">Template</Label> : null}
+        <div className="actions">
+          <RepoActions repo={repo} />
+        </div>
+      </div>
       <div className="repo-nav-row">
         <UnderlineNav aria-label="Repository">
           {items
             .filter((i) => i.show)
             .map((i) => (
-              <UnderlineNavLink key={i.name} to={i.to} params={p} icon={i.icon} activeOptions={{ exact: true }} aria-current={current(i.name) ? 'page' : undefined} counter={i.count}>
+              <UnderlineNavLink key={i.name} to={i.to} params={p} icon={i.icon} activeOptions={{ exact: true }} aria-current={current(i.name) ? 'page' : undefined} counter={i.count || undefined}>
                 {i.label}
               </UnderlineNavLink>
             ))}
         </UnderlineNav>
-        <RepoActions repo={repo} />
       </div>
     </div>
   );

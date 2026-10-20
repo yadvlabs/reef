@@ -6,18 +6,20 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { useState } from 'react';
 import { api, type Repo } from '../lib/api';
-import { contributorsQuery, LANGUAGE_COLORS, languagesQuery, releasesQuery } from '../lib/repo';
+import { contributorsQuery, LANGUAGE_COLORS, languagesQuery, releasesQuery, tagsQuery } from '../lib/repo';
 
 export function RepoSidebar({ repo, empty }: { repo: Repo; empty: boolean }) {
   const p = { owner: repo.owner.login, repo: repo.name };
   const releases = useQuery({ ...releasesQuery(repo.owner.login, repo.name), enabled: !empty });
   const contributors = useQuery({ ...contributorsQuery(repo.owner.login, repo.name), enabled: !empty });
   const languages = useQuery({ ...languagesQuery(repo.owner.login, repo.name), enabled: !empty });
+  const tags = useQuery({ ...tagsQuery(repo.owner.login, repo.name), enabled: !empty });
   const [editing, setEditing] = useState(false);
   const canAdmin = !!repo.permissions?.admin;
   const latest = releases.data?.find((r) => !r.draft && !r.prerelease) ?? releases.data?.find((r) => !r.draft);
   const langTotal = Object.values(languages.data ?? {}).reduce((a, b) => a + b, 0);
-  const langs = Object.entries(languages.data ?? {}).sort((a, b) => b[1] - a[1]);
+  // Languages that would show as 0.0% are left out, as on GitHub.
+  const langs = Object.entries(languages.data ?? {}).filter(([, b]) => b / langTotal >= 0.0005).sort((a, b) => b[1] - a[1]);
   return (
     <aside className="about repo-sidebar">
       <section>
@@ -33,7 +35,7 @@ export function RepoSidebar({ repo, empty }: { repo: Repo; empty: boolean }) {
             </Link>
           </p>
         ) : null}
-        {repo.description ? <p>{repo.description}</p> : <p className="muted">No description, website, or topics provided.</p>}
+        {repo.description ? <p className="description">{repo.description}</p> : <p className="muted description">No description, website, or topics provided.</p>}
         {repo.homepage ? (
           <p>
             <a href={repo.homepage} style={{ display: 'inline-flex', gap: 6, alignItems: 'center', fontWeight: 600 }}>
@@ -88,6 +90,13 @@ export function RepoSidebar({ repo, empty }: { repo: Repo; empty: boolean }) {
               <span className="muted small" style={{ display: 'block' }}>{latest.published_at ? <RelativeTime datetime={latest.published_at} /> : null}</span>
             </span>
           </Link>
+        ) : tags.data?.length ? (
+          <Link to="/$owner/$repo/tags" params={p} className="latest-release">
+            <TagIcon className="release-icon" />
+            <span>
+              <strong>{tags.data.length}</strong> {tags.data.length === 1 ? 'tag' : 'tags'}
+            </span>
+          </Link>
         ) : (
           <p className="muted small">
             No releases published.
@@ -108,22 +117,36 @@ export function RepoSidebar({ repo, empty }: { repo: Repo; empty: boolean }) {
         ) : null}
       </section>
 
-      <section>
-        <h2>
-          <span>
-            Packages
-          </span>
-        </h2>
-        <p className="muted small" style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-          <PackageIcon /> No packages published
-        </p>
-      </section>
+      {repo.permissions?.push ? (
+        <section>
+          <h2>Packages</h2>
+          <p className="muted small" style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+            <PackageIcon /> No packages published
+          </p>
+        </section>
+      ) : null}
 
       {contributors.data?.length ? (
         <section>
           <h2>
             Contributors <span className="counter">{contributors.data.length}</span>
           </h2>
+          {contributors.data.length === 1 ? (
+            <div className="contributor-row">
+              {contributors.data[0].login ? (
+                <Link to="/$owner" params={{ owner: contributors.data[0].login }} className="contributor-row">
+                  <Avatar src={contributors.data[0].avatar_url ?? ''} size={32} alt="" />
+                  <strong>{contributors.data[0].login}</strong>
+                  {contributors.data[0].name ? <span className="muted">{contributors.data[0].name}</span> : null}
+                </Link>
+              ) : (
+                <>
+                  <Avatar src={contributors.data[0].avatar_url ?? ''} size={32} alt="" />
+                  <strong>{contributors.data[0].name ?? contributors.data[0].email}</strong>
+                </>
+              )}
+            </div>
+          ) : (
           <div className="contributors">
             {contributors.data.slice(0, 14).map((c, i) =>
               c.login ? (
@@ -137,6 +160,7 @@ export function RepoSidebar({ repo, empty }: { repo: Repo; empty: boolean }) {
               ),
             )}
           </div>
+          )}
           {contributors.data.length > 14 ? <p className="small muted" style={{ marginTop: 8 }}>+ {contributors.data.length - 14} contributors</p> : null}
         </section>
       ) : null}

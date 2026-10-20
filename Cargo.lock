@@ -5368,7 +5368,7 @@ dependencies = [
 
 [[package]]
 name = "reef"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "anyhow",
  "axum",
@@ -5391,7 +5391,7 @@ dependencies = [
 
 [[package]]
 name = "reef-actions"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "indexmap 2.14.2",
  "serde",
@@ -5402,7 +5402,7 @@ dependencies = [
 
 [[package]]
 name = "reef-api"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "aes 0.8.4",
  "aes-gcm 0.10.3",
@@ -5463,7 +5463,7 @@ dependencies = [
 
 [[package]]
 name = "reef-core"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "base64 0.23.1",
  "hex",
@@ -5478,7 +5478,7 @@ dependencies = [
 
 [[package]]
 name = "reef-db"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "argon2 0.6.0",
  "hex",
@@ -5495,7 +5495,7 @@ dependencies = [
 
 [[package]]
 name = "reef-git"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "bytes",
  "futures",
@@ -5510,7 +5510,7 @@ dependencies = [
 
 [[package]]
 name = "reef-ssh"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "bytes",
  "reef-api",

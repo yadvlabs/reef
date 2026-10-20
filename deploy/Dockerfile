@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # Reef container image. Build from the repository root:
 #   docker build -f deploy/Dockerfile -t yadvlabs/reef:dev .
-#   docker buildx build --platform linux/amd64,linux/arm64 -f deploy/Dockerfile -t yadvlabs/reef:0.1.1 .
+#   docker buildx build --platform linux/amd64,linux/arm64 -f deploy/Dockerfile -t yadvlabs/reef:0.1.2 .
 # The binary is cross-compiled on the build platform (cargo-zigbuild, static musl), so a
 # multi-arch build never runs the Rust compiler under emulation.
 #

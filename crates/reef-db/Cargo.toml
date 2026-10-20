@@ -9,7 +9,7 @@ repository.workspace = true
 
 [dependencies]
 argon2 = "0.6.0"
-reef-core = { version = "0.1.1", path = "../reef-core" }
+reef-core = { version = "0.1.2", path = "../reef-core" }
 hex = "0.4.3"
 rand = "0.10.3"
 serde = "1.0.229"

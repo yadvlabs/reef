@@ -29,7 +29,7 @@ export function BranchMenu({ repo, rev, path, mode }: { repo: Repo; rev: string;
   return (
     <ActionMenu>
       <ActionMenu.Button leadingVisual={isTag ? TagIcon : GitBranchIcon}>
-        <span className="monospace" style={{ fontSize: 12 }}>{rev.length === 40 ? rev.slice(0, 7) : rev}</span>
+        {rev.length === 40 ? <span className="monospace" style={{ fontSize: 12 }}>{rev.slice(0, 7)}</span> : rev}
       </ActionMenu.Button>
       <ActionMenu.Overlay width="medium">
         <div style={{ padding: 8 }}>

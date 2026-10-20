@@ -225,7 +225,7 @@ fn file_response(
         Some("html") => {
             let text = String::from_utf8_lossy(&blob.data);
             let html = if entry.name.to_lowercase().ends_with(".md") || entry.name.to_lowercase().ends_with(".markdown") {
-                crate::render::markdown(&text)
+                crate::render::markdown_file(&text, rw, rev, &entry.path)
             } else {
                 format!("<pre>{}</pre>", ammonia::clean_text(&text))
             };
@@ -740,7 +740,10 @@ pub async fn git_tree(
 // ----- raw files and blame (Reef-specific, used by the web UI) -----
 
 /// `GET /repos/{owner}/{repo}/raw/{rev}/{*path}`: the blob bytes with a content type guessed
-/// from the file name. Text-like files are served as `text/plain` so browsers never execute them.
+/// from the file name. Text-like files are served as `text/plain` so browsers never execute
+/// them; images (SVG included, so README logos render) come with a sandboxing
+/// Content-Security-Policy, so a script inside an SVG opened directly cannot run against
+/// the site.
 pub async fn raw(
     State(s): State<AppState>,
     auth: Auth,
@@ -756,7 +759,7 @@ pub async fn raw(
     let blob = with_repo(&s, &rw, move |r| r.blob_at(&rev2, &path2)).await?;
     let mime = mime_guess::from_path(&path).first_or_octet_stream();
     let essence = mime.essence_str().to_string();
-    let safe = if essence.starts_with("image/") && essence != "image/svg+xml"
+    let safe = if essence.starts_with("image/")
         || essence.starts_with("video/")
         || essence.starts_with("audio/")
         || essence == "application/pdf"
@@ -774,6 +777,7 @@ pub async fn raw(
             (header::CONTENT_TYPE, safe),
             (header::CONTENT_DISPOSITION, format!("inline; filename=\"{}\"", name.replace('"', ""))),
             (header::X_CONTENT_TYPE_OPTIONS, "nosniff".to_string()),
+            (header::CONTENT_SECURITY_POLICY, "default-src 'none'; style-src 'unsafe-inline'; sandbox".to_string()),
             (header::CACHE_CONTROL, "private, max-age=60".to_string()),
         ],
         blob.data,

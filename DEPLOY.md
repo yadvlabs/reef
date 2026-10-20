@@ -226,7 +226,7 @@ runners  --https-->  LB                          +--> CephFS / NFS   /var/lib/re
 ## 5. Container
 
 Images for linux/amd64 and linux/arm64 are published at `yadvlabs/reef` on Docker Hub,
-tagged with the release version (`0.1.1`, `0.1`) and `latest`. The image runs as `reef`
+tagged with the release version (`0.1.2`, `0.1`) and `latest`. The image runs as `reef`
 (uid 4920) with `git`, `git-lfs` and `ssh-keygen` installed; the binary is the same static
 one as in the release tarball.
 

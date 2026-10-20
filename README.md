@@ -67,7 +67,7 @@ with a static binary, a systemd unit and an annotated configuration file. It nee
 `git` on the host (plus `git-lfs` for LFS and `ssh-keygen` for SSH-signed commits).
 
 ```sh
-tar xzf reef-v0.1.1-linux-amd64.tar.gz && cd reef-v0.1.1-linux-amd64
+tar xzf reef-v0.1.2-linux-amd64.tar.gz && cd reef-v0.1.2-linux-amd64
 REEF_DATA_DIR=$PWD/reef-data bin/reef serve         # try it on http://localhost:4920
 ```
 

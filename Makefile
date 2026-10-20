@@ -4,10 +4,10 @@ SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
 # Plain builds stamp `git describe --tags` (no --dirty; `-dirty` goes on the commit only),
-# falling back to v0.1.1-dev; releases pass VERSION=v…. An empty VERSION (an unset workflow
+# falling back to v0.1.2-dev; releases pass VERSION=v…. An empty VERSION (an unset workflow
 # variable) counts as not given.
 ifeq ($(strip $(VERSION)),)
-override VERSION := $(shell git describe --tags 2>/dev/null || echo v0.1.1-dev)
+override VERSION := $(shell git describe --tags 2>/dev/null || echo v0.1.2-dev)
 endif
 PORT          ?= 4920
 SSH_PORT      ?= 4922
@@ -193,7 +193,7 @@ build-native: web ## Release binary for this machine into bin/host/
 	REEF_VERSION=$(VERSION) cargo build --locked --release $(CARGO_FLAGS)
 	@mkdir -p bin/host && cp target/release/reef bin/host/reef && ls -l bin/host/reef
 
-release: ## Versioned build: make release VERSION=v0.1.1 -> dist/reef-<version>-linux-<arch>.tar.gz + SHA256SUMS
+release: ## Versioned build: make release VERSION=v0.1.2 -> dist/reef-<version>-linux-<arch>.tar.gz + SHA256SUMS
 	@cv=v$$(cargo metadata --no-deps --format-version 1 | python3 -c 'import json,sys; print([p for p in json.load(sys.stdin)["packages"] if p["name"]=="reef"][0]["version"])'); \
 	  case "$(VERSION)" in "$$cv"|"$$cv"-*) ;; *) echo "VERSION=$(VERSION) is neither the Cargo version $$cv nor a pre-release of it; bump Cargo.toml, web/package.json and the Makefile fallback together"; exit 1 ;; esac
 	@$(MAKE) build

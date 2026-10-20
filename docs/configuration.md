@@ -12,7 +12,7 @@ reef serve   [--config PATH] [--listen ADDR]   migrate at start, then serve unti
 reef migrate [--config PATH]                   apply migrations and exit
 reef config check [--config PATH]              load, validate, print the effective config (secrets redacted) and warnings
 reef config example                            print the annotated configuration reference (every key, its default)
-reef version | --version                       "reef v0.1.1 (<commit>)"
+reef version | --version                       "reef v0.1.2 (<commit>)"
 reef print-unit                                the systemd unit shipped with this build
 reef create-user | set-admin | set-password | create-org | create-token | rekey-issuer
 ```
@@ -290,7 +290,7 @@ Reef presents itself as a GitHub Enterprise Server host: REST at `/api/v3`, Grap
 `/api/graphql`, the device flow at `/login/device/code` and `/login/oauth/access_token`.
 
 `GET /api/v3/meta` reports `installed_version` as bare semver (what `gh` and octokit parse as
-the GHES version) and `version` as the full `v0.1.1 (<commit>)` string.
+the GHES version) and `version` as the full `v0.1.2 (<commit>)` string.
 
 `gh` insists on HTTPS for every host, including `localhost`. For local development route it
 through the Unix socket, which carries plain HTTP regardless of the `https://` URL:

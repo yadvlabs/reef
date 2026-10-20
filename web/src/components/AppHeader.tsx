@@ -1,10 +1,8 @@
-import { ActionList, ActionMenu, Avatar, IconButton, Label, TextInput } from '@primer/react';
+import { ActionList, ActionMenu, Avatar, IconButton, TextInput } from '@primer/react';
 import { ButtonLink, ActionListLink } from './links';
-import { PlusIcon, SearchIcon, RepoIcon, OrganizationIcon, PersonIcon, GearIcon, SignOutIcon, KeyIcon, TableIcon, BookIcon, ShieldLockIcon, StarIcon, IssueOpenedIcon, GitPullRequestIcon } from '@primer/octicons-react';
+import { PlusIcon, SearchIcon, RepoIcon, OrganizationIcon, PersonIcon, GearIcon, SignOutIcon, KeyIcon, TableIcon, ShieldLockIcon, StarIcon, IssueOpenedIcon, GitPullRequestIcon } from '@primer/octicons-react';
 import { Link, useNavigate } from '@tanstack/react-router';
-import { useQuery } from '@tanstack/react-query';
 import { reef, type Repo } from '../lib/api';
-import { accountQuery } from './OwnerTabs';
 import { useRefreshSession, useSession } from '../lib/session';
 import { Logo } from './Logo';
 import { NotificationsBell } from './NotificationsBell';
@@ -36,9 +34,6 @@ export function AppHeader({ context, dashboard }: { context?: HeaderContext; das
     navigate({ to: '/' });
   }
 
-  const r = context?.repoData;
-  const ownerAccount = useQuery({ ...accountQuery(context?.owner ?? ''), enabled: !!context && !context.repo });
-  const ownerAvatar = ownerAccount.data ? <Avatar src={ownerAccount.data.avatar_url} size={20} square={ownerAccount.data.type === 'Organization'} alt="" /> : null;
   return (
     <header className="app-header">
       <Link to="/" className="brand" aria-label={instance?.name ?? 'Reef'}>
@@ -47,9 +42,6 @@ export function AppHeader({ context, dashboard }: { context?: HeaderContext; das
       </Link>
       {context ? (
         <nav className="context" aria-label="Page context">
-          <span className="ctx-icon">
-            {context.repo ? (r ? <Avatar src={r.owner.avatar_url} size={20} square={r.owner.type === 'Organization'} alt="" /> : <RepoIcon size={16} />) : ownerAvatar ?? (context.section?.to === 'projects' ? <TableIcon size={16} /> : context.section?.to === 'wiki' ? <BookIcon size={16} /> : <PersonIcon size={16} />)}
-          </span>
           <Link to="/$owner" params={{ owner: context.owner }} className="owner">
             {context.owner}
           </Link>
@@ -60,13 +52,6 @@ export function AppHeader({ context, dashboard }: { context?: HeaderContext; das
                 {context.repo}
               </Link>
               <RepoSwitcher owner={context.owner} repo={context.repo} />
-              {r ? (
-                <Label className="visibility" variant="secondary">
-                  {r.private ? 'Private' : 'Public'}
-                </Label>
-              ) : null}
-              {r?.archived ? <Label variant="attention">Archived</Label> : null}
-              {r?.is_template ? <Label variant="secondary">Template</Label> : null}
             </>
           ) : context.section ? (
             <>
