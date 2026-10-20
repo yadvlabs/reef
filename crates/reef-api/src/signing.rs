@@ -270,6 +270,25 @@ fn email_of_user_id(uid: &[u8]) -> Option<String> {
     None
 }
 
+/// Keep only the signatures the key made on itself (or ones that name no issuer at all):
+/// certifications by other keys are the web of trust, not part of the key.
+fn drop_third_party_certifications(key: &mut SignedPublicKey) {
+    let id = key.primary_key.legacy_key_id();
+    let fp = key.primary_key.fingerprint();
+    let own = |sig: &pgp::packet::Signature| {
+        let ids = sig.issuer_key_id();
+        let fps = sig.issuer_fingerprint();
+        (ids.is_empty() && fps.is_empty()) || ids.iter().any(|i| **i == id) || fps.iter().any(|f| **f == fp)
+    };
+    for u in &mut key.details.users {
+        u.signatures.retain(|s| own(s));
+    }
+    for a in &mut key.details.user_attributes {
+        a.signatures.retain(|s| own(s));
+    }
+    key.details.revocation_signatures.retain(|s| own(s));
+}
+
 pub fn parse_gpg_key(armored: &str) -> Result<ParsedGpgKey, Error> {
     let armored = armored.trim();
     if !armored.contains("BEGIN PGP PUBLIC KEY BLOCK") {
@@ -280,8 +299,13 @@ pub fn parse_gpg_key(armored: &str) -> Result<ParsedGpgKey, Error> {
             "key is invalid: paste an ASCII-armored public key (gpg --armor --export <id>)",
         ));
     }
-    let (key, _) = SignedPublicKey::from_string(armored)
+    let (mut key, _) = SignedPublicKey::from_string(armored)
         .map_err(|e| Error::field("GpgKey", "armored_public_key", "invalid", format!("key is invalid: {e}")))?;
+    // gpg exports a key together with certifications other people made on its user ids (the
+    // web of trust). Those are not the key's own bindings and cannot be verified without the
+    // signers' keys, so they are dropped before the key is checked, as GitHub does; the
+    // self-signatures and subkey bindings must verify.
+    drop_third_party_certifications(&mut key);
     if let Err(e) = key.verify_bindings() {
         return Err(Error::field("GpgKey", "armored_public_key", "invalid", format!("key is invalid: {e}")));
     }
@@ -377,6 +401,48 @@ pub fn _unused(_: Id) {}
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// A fresh ed25519 key as `gpg --export-options export-minimal` writes it.
+    const MINIMAL: &str = include_str!("../tests/fixtures/gpg-minimal.asc");
+    /// The same key as `gpg --export` writes it after another key certified its user id.
+    const CERTIFIED: &str = include_str!("../tests/fixtures/gpg-third-party-certified.asc");
+    /// A 2012 RSA key with SHA-1 self-signatures, an encryption subkey and four web-of-trust
+    /// certifications from keys that are not included.
+    const WEB_OF_TRUST: &str = include_str!("../tests/fixtures/gpg-rsa4096-2012-web-of-trust.asc");
+
+    #[test]
+    fn a_minimal_key_parses() {
+        let k = parse_gpg_key(MINIMAL).unwrap();
+        assert_eq!(k.key_id, "81667E591F9420EC");
+        assert_eq!(k.emails, vec!["alice@example.com"]);
+        assert!(k.can_sign && k.can_certify);
+    }
+
+    #[test]
+    fn certifications_by_other_keys_are_ignored() {
+        let k = parse_gpg_key(CERTIFIED).unwrap();
+        assert_eq!(k.key_id, "81667E591F9420EC");
+        assert_eq!(k.emails, vec!["alice@example.com"]);
+        assert!(k.can_sign, "key flags come from the self-signature, not the third-party one");
+        let k = parse_gpg_key(WEB_OF_TRUST).unwrap();
+        assert_eq!(k.key_id, "484248210EE3D884");
+        assert_eq!(k.emails, vec!["bhaisaab@apache.org"]);
+        assert!(k.can_sign && k.can_encrypt_comms, "the encryption subkey is read");
+        assert_eq!(k.subkeys.as_array().map(|a| a.len()), Some(1));
+    }
+
+    #[test]
+    fn a_damaged_key_is_still_refused() {
+        // Flip a byte inside the self-signature: the key's own binding must fail.
+        let mut lines: Vec<String> = MINIMAL.lines().map(String::from).collect();
+        let i = lines.len() - 3;
+        let b = lines[i].as_bytes().to_vec();
+        let mut c = b.clone();
+        c[10] = if b[10] == b'A' { b'B' } else { b'A' };
+        lines[i] = String::from_utf8(c).unwrap();
+        let text = lines.join("\n");
+        assert!(parse_gpg_key(&text).is_err());
+    }
 
     const SIGNED: &str = "tree 4b825dc642cb6eb9a060e54bf8d69288fbee4904\nparent 0000000000000000000000000000000000000001\nauthor A <a@x> 1 +0000\ncommitter A <a@x> 1 +0000\ngpgsig -----BEGIN PGP SIGNATURE-----\n \n iQEzBAABCAAdFiEE\n =abcd\n -----END PGP SIGNATURE-----\n\nHello\n";
 
