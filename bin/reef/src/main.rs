@@ -16,6 +16,8 @@ use std::time::Duration;
 const VERSION: &str = reef_api::VERSION;
 /// The unit shipped in the bundle; `print-unit` prints exactly this.
 const UNIT: &str = include_str!("../../../deploy/systemd/reef.service");
+/// The annotated configuration reference; `config example` prints exactly this.
+const EXAMPLE: &str = include_str!("../../../deploy/reef.conf.example");
 /// After a stop signal `/readyz` answers 503 while the listeners keep accepting for this
 /// long, so load balancers take the instance out of rotation before connections are refused.
 const READINESS_DRAIN: Duration = Duration::from_secs(5);
@@ -114,6 +116,9 @@ enum Cmd {
 enum ConfigCmd {
     /// Load and validate the configuration, print it with secrets redacted; exit 1 on error.
     Check,
+    /// Print the annotated configuration reference (every key with its default), e.g.
+    /// `reef config example > /etc/reef/reef.conf`.
+    Example,
 }
 
 async fn open(cfg: &Config) -> anyhow::Result<(Db, Store)> {
@@ -145,6 +150,10 @@ async fn run() -> anyhow::Result<()> {
         }
         Cmd::PrintUnit => {
             print!("{UNIT}");
+            return Ok(());
+        }
+        Cmd::Config { cmd: ConfigCmd::Example } => {
+            print!("{EXAMPLE}");
             return Ok(());
         }
         Cmd::Hook { name } => {
@@ -254,6 +263,9 @@ async fn serve(cfg: Config) -> anyhow::Result<()> {
         data_dir = %cfg.data_dir.display(),
         "reef starting"
     );
+    for w in cfg.warnings() {
+        tracing::warn!("{w}");
+    }
     let state = AppState::new(db, store, cfg.clone())?;
     // TLS material is parsed before anything is bound or announced: a bad certificate or key
     // fails the start, not the first connection after READY=1.

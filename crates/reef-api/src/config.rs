@@ -78,7 +78,8 @@ pub struct Config {
 #[serde(default, deny_unknown_fields)]
 #[derive(Default)]
 pub struct TlsConfig {
-    /// PEM certificate chain. Both empty = plain HTTP (dev only; refused when `site_url` is https).
+    /// PEM certificate chain. Both files empty = plain HTTP, for development or behind a reverse
+    /// proxy that terminates TLS (then list it in `[http] trusted_proxies`).
     pub cert_file: String,
     /// PEM private key.
     pub key_file: String,
@@ -680,9 +681,6 @@ impl Config {
         if self.tls.cert_file.is_empty() != self.tls.key_file.is_empty() {
             return Err(Error::msg("tls: cert_file and key_file must both be set (or both empty)"));
         }
-        if self.is_https() && !self.tls.enabled() {
-            return Err(Error::msg("site_url is https but [tls] is not configured; plain HTTP is for development only"));
-        }
         if !self.data_dir.is_absolute() {
             self.data_dir = std::env::current_dir().map(|c| c.join(&self.data_dir)).unwrap_or_else(|_| self.data_dir.clone());
         }
@@ -730,6 +728,18 @@ impl Config {
         }
         self.http.trusted_proxy_nets()?;
         Ok(())
+    }
+
+    /// Configurations that load but deserve a word: printed by `config check`, logged by `serve`.
+    pub fn warnings(&self) -> Vec<String> {
+        let mut w = Vec::new();
+        if self.is_https() && !self.tls.enabled() && self.http.trusted_proxies.is_empty() {
+            w.push(
+                "site_url is https but Reef serves plain HTTP here and [http] trusted_proxies is empty: fine when a reverse proxy terminates TLS in front, but list that proxy (REEF_HTTP_TRUSTED_PROXIES) so client addresses, rate limits and request logs are right"
+                    .into(),
+            );
+        }
+        w
     }
 
     /// Read every `*_file` and secret env twin (the env twin wins over the file), and check
@@ -813,6 +823,9 @@ impl Config {
             self.loaded.oidc_client_secret.as_ref().map(|s| format!("<redacted> (from {})", s.source)).unwrap_or_else(|| "(unset)".into())
         ));
         out.push_str(&format!("# database (effective): {}\n", redact_url(&self.database_url())));
+        for w in self.warnings() {
+            out.push_str(&format!("# warning: {w}\n"));
+        }
         out
     }
 }
@@ -1185,11 +1198,17 @@ mod tests {
         c.node_id = 15;
         c.validate().unwrap();
         c.site_url = "https://reef.example.com".into();
-        assert!(c.validate().unwrap_err().to_string().contains("[tls]"));
+        c.validate().unwrap();
+        assert!(c.warnings().iter().any(|w| w.contains("trusted_proxies")), "https behind an unlisted proxy is a warning, not an error");
+        assert!(c.render_redacted(&Sources::default()).contains("# warning: site_url is https"));
+        c.http.trusted_proxies = vec!["10.0.0.0/8".into()];
+        assert!(c.warnings().is_empty(), "a listed proxy is the expected TLS terminator");
+        c.http.trusted_proxies.clear();
         c.tls.cert_file = "/etc/reef/tls/reef.crt".into();
         assert!(c.validate().unwrap_err().to_string().contains("key_file"));
         c.tls.key_file = "/etc/reef/tls/reef.key".into();
         c.validate().unwrap();
+        assert!(c.warnings().is_empty(), "Reef terminating TLS itself needs no proxy");
     }
 
     #[test]

@@ -1,12 +1,14 @@
 # syntax=docker/dockerfile:1
 # Reef container image. Build from the repository root:
 #   docker build -f deploy/Dockerfile -t yadvlabs/reef:dev .
-#   docker buildx build --platform linux/amd64,linux/arm64 -f deploy/Dockerfile -t yadvlabs/reef:0.1.0 .
+#   docker buildx build --platform linux/amd64,linux/arm64 -f deploy/Dockerfile -t yadvlabs/reef:0.1.1 .
 # The binary is cross-compiled on the build platform (cargo-zigbuild, static musl), so a
 # multi-arch build never runs the Rust compiler under emulation.
 #
 # Run:  docker run -d -p 4920:4920 -p 4922:4922 -v reef-data:/var/lib/reef yadvlabs/reef
-# Configuration: REEF_* variables (see deploy/reef.conf.example), or mount /etc/reef/reef.conf.
+# Configuration: REEF_* variables, or mount /etc/reef/reef.conf (`docker run --rm yadvlabs/reef
+# config example` prints the annotated file). Behind a TLS-terminating proxy set
+# REEF_SITE_URL=https://... and REEF_HTTP_TRUSTED_PROXIES to the proxy's address.
 # State under /var/lib/reef (uid 4920). Ports 4920 (HTTP/S) and 4922 (SSH).
 
 # ---- web UI --------------------------------------------------------------------------------
@@ -40,6 +42,7 @@ COPY Cargo.toml Cargo.lock ./
 COPY bin/ bin/
 COPY crates/ crates/
 COPY deploy/systemd/ deploy/systemd/
+COPY deploy/reef.conf.example deploy/
 COPY --from=web /src/web/dist web/dist
 RUN --mount=type=cache,target=/usr/local/cargo/registry,id=reef-registry-${TARGETARCH} \
     --mount=type=cache,target=/usr/local/cargo/git,id=reef-git-${TARGETARCH} \

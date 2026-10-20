@@ -9,7 +9,7 @@ repository.workspace = true
 
 [dependencies]
 bytes = "1.12.1"
-reef-core = { version = "0.1.0", path = "../reef-core" }
+reef-core = { version = "0.1.1", path = "../reef-core" }
 futures = "0.3.34"
 gix = { version = "0.88.0", features = ["max-performance"] }
 serde = { version = "1.0.229", features = ["derive"] }

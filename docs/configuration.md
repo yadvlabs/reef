@@ -10,8 +10,9 @@ lists every key with its default.
 ```
 reef serve   [--config PATH] [--listen ADDR]   migrate at start, then serve until SIGTERM
 reef migrate [--config PATH]                   apply migrations and exit
-reef config check [--config PATH]              load, validate, print the effective config (secrets redacted)
-reef version | --version                       "reef v0.1.0 (<commit>)"
+reef config check [--config PATH]              load, validate, print the effective config (secrets redacted) and warnings
+reef config example                            print the annotated configuration reference (every key, its default)
+reef version | --version                       "reef v0.1.1 (<commit>)"
 reef print-unit                                the systemd unit shipped with this build
 reef create-user | set-admin | set-password | create-org | create-token | rekey-issuer
 ```
@@ -38,7 +39,7 @@ containers and development.
 | `instance_name` | `REEF_INSTANCE_NAME` | `"Reef"` | Name shown in the UI. |
 | `git_binary` | `REEF_GIT_BINARY` | `"git"` | The git executable. |
 | `allow_signup` | `REEF_ALLOW_SIGNUP` | `false` | Self-service accounts (standalone mode only; the first account can always be created). |
-| `tls.cert_file` | `REEF_TLS_CERT_FILE` | `""` | PEM chain. Both TLS files empty = plain HTTP, refused when `site_url` is https. |
+| `tls.cert_file` | `REEF_TLS_CERT_FILE` | `""` | PEM chain. Both TLS files empty = plain HTTP: development, or behind a proxy that terminates TLS (`site_url` https, proxy in `http.trusted_proxies`). |
 | `tls.key_file` | `REEF_TLS_KEY_FILE` | `""` | PEM key. |
 | `tls.client_ca_file` | `REEF_TLS_CLIENT_CA_FILE` | `""` | Reserved for mTLS. |
 | `database.url` | `REEF_DATABASE_URL` | `""` | `postgres://user@host:5432/reef?sslmode=disable` or `sqlite:///path/reef.db`; `""` = `sqlite://<data_dir>/reef.db`. |
@@ -289,7 +290,7 @@ Reef presents itself as a GitHub Enterprise Server host: REST at `/api/v3`, Grap
 `/api/graphql`, the device flow at `/login/device/code` and `/login/oauth/access_token`.
 
 `GET /api/v3/meta` reports `installed_version` as bare semver (what `gh` and octokit parse as
-the GHES version) and `version` as the full `v0.1.0 (<commit>)` string.
+the GHES version) and `version` as the full `v0.1.1 (<commit>)` string.
 
 `gh` insists on HTTPS for every host, including `localhost`. For local development route it
 through the Unix socket, which carries plain HTTP regardless of the `https://` URL:

@@ -36,7 +36,8 @@ git_binary = "git"
 allow_signup = false
 
 [tls]
-# PEM certificate chain and key. Both empty = plain HTTP (dev only; refused when site_url is https).
+# PEM certificate chain and key. Both empty = plain HTTP: for development, or behind a reverse
+# proxy that terminates TLS (set site_url to https and list the proxy in [http] trusted_proxies).
 cert_file = ""
 key_file = ""
 # Reserved for mTLS; a key of its own, not an alias of any other.

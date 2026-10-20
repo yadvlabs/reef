@@ -54,9 +54,11 @@ docker run -d --name reef \
 
 Open http://localhost:4920 and create the first account. It becomes the site administrator.
 Images are published for linux/amd64 and linux/arm64. Every setting is an environment
-variable, so for a real host add `-e REEF_SITE_URL=https://reef.example.com` and put a
-reverse proxy with TLS in front. [`deploy/docker-compose.yml`](deploy/docker-compose.yml) is
-the same with an optional PostgreSQL service.
+variable: for a real host put a reverse proxy with TLS in front and add
+`-e REEF_SITE_URL=https://reef.example.com -e REEF_HTTP_TRUSTED_PROXIES=<proxy address>`.
+Prefer a file? `docker run --rm yadvlabs/reef config example` prints the annotated reference
+to mount at `/etc/reef/reef.conf`. [`deploy/docker-compose.yml`](deploy/docker-compose.yml)
+is the same with an optional PostgreSQL service.
 
 ### Binary
 
@@ -65,7 +67,7 @@ with a static binary, a systemd unit and an annotated configuration file. It nee
 `git` on the host (plus `git-lfs` for LFS and `ssh-keygen` for SSH-signed commits).
 
 ```sh
-tar xzf reef-v0.1.0-linux-amd64.tar.gz && cd reef-v0.1.0-linux-amd64
+tar xzf reef-v0.1.1-linux-amd64.tar.gz && cd reef-v0.1.1-linux-amd64
 REEF_DATA_DIR=$PWD/reef-data bin/reef serve         # try it on http://localhost:4920
 ```
 

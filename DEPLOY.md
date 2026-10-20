@@ -34,10 +34,46 @@ large uploads and scratch files go under `/var/lib/reef/tmp`.
 
 ## 2. TLS and the proxy
 
-Reef terminates TLS itself when `[tls]` is set (`cert_file`, `key_file`; rustls, TLS 1.2+).
-Plain HTTP is for development only and is refused when `site_url` is `https://`. Each new
-connection gets 10 s to finish its PROXY header and TLS handshake, and at most 1024 handshakes
-per listener are in progress at once (further connections wait in the kernel backlog).
+Two ways to serve HTTPS:
+
+- **A reverse proxy terminates TLS** (nginx, Caddy, Traefik, HAProxy, a cloud load balancer):
+  the usual setup, and the one the container is built for. Reef keeps serving plain HTTP on
+  4920, `site_url` is the public `https://` address, and the proxy is listed in
+  `[http] trusted_proxies` so Reef takes client addresses from its forwarding header. Without
+  that entry Reef still starts, with a warning from `reef config check` and at start, but
+  every request would count as coming from the proxy.
+- **Reef terminates TLS itself** when `[tls]` is set (`cert_file`, `key_file`; rustls,
+  TLS 1.2+). Each new connection gets 10 s to finish its PROXY header and TLS handshake, and
+  at most 1024 handshakes per listener are in progress at once (further connections wait in
+  the kernel backlog).
+
+A minimal nginx site for the first case:
+
+```nginx
+map $http_upgrade $connection_upgrade { default upgrade; '' close; }
+
+server {
+    listen 443 ssl;
+    server_name reef.example.com;
+    ssl_certificate     /etc/letsencrypt/live/reef.example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/reef.example.com/privkey.pem;
+    client_max_body_size 0;              # git pushes stream pack files
+    location / {
+        proxy_pass         http://127.0.0.1:4920;
+        proxy_http_version 1.1;
+        proxy_set_header   Host $host;
+        proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header   Upgrade $http_upgrade;
+        proxy_set_header   Connection $connection_upgrade;
+        proxy_read_timeout 300s;         # runner long-polls and large pushes
+        proxy_request_buffering off;
+    }
+}
+```
+
+with `REEF_SITE_URL=https://reef.example.com` and `REEF_HTTP_TRUSTED_PROXIES=127.0.0.1` on the
+Reef side (or the Docker network's range, such as `172.16.0.0/12`, when nginx reaches Reef
+through Docker). The full configuration for the second case:
 
 ```toml
 # TOML
@@ -74,10 +110,8 @@ user's next sign-in moves their identity to the new issuer. Or move everyone at 
 either, existing users are asked to link their account on first sign-in. Only list former
 URLs of the same provider. Details in `docs/configuration.md` ("Changing the issuer URL").
 
-With a proxy in front (HAProxy, nginx, Caddy or a cloud load balancer on 80/443), either pass
-TCP through to 4920 and let Reef terminate, or terminate at the proxy and re-encrypt to
-Reef's own certificate. Do not downgrade to plain HTTP behind the proxy when `site_url` is
-https: Reef then requires `[tls]`.
+A proxy can also pass TCP straight through to 4920 and let Reef terminate, or terminate and
+re-encrypt to Reef's own certificate; both work with `[tls]` set.
 
 What `site_url` controls:
 
@@ -192,7 +226,7 @@ runners  --https-->  LB                          +--> CephFS / NFS   /var/lib/re
 ## 5. Container
 
 Images for linux/amd64 and linux/arm64 are published at `yadvlabs/reef` on Docker Hub,
-tagged with the release version (`0.1.0`, `0.1`) and `latest`. The image runs as `reef`
+tagged with the release version (`0.1.1`, `0.1`) and `latest`. The image runs as `reef`
 (uid 4920) with `git`, `git-lfs` and `ssh-keygen` installed; the binary is the same static
 one as in the release tarball.
 
@@ -204,11 +238,15 @@ docker run -d --name reef -p 4920:4920 -p 4922:4922 \
 ```
 
 - Configuration: `REEF_*` variables, or mount a TOML file at `/etc/reef/reef.conf` (and
-  drop-ins under `/etc/reef/conf.d/`). With nothing set Reef runs in standalone mode on
-  SQLite and the first sign-up is the site administrator.
-- State: a volume at `/var/lib/reef`. A bind mount must be writable by uid 4920.
-- TLS: terminate at a proxy in front and keep `site_url` https; or mount the certificate and
-  set `REEF_TLS_CERT_FILE` / `REEF_TLS_KEY_FILE`.
+  drop-ins under `/etc/reef/conf.d/`). `docker run --rm yadvlabs/reef config example` prints
+  the annotated reference to start from; a host directory bind-mounted over `/etc/reef`
+  hides the copy inside the image, which is why it looks empty. With nothing set Reef runs
+  in standalone mode on SQLite and the first sign-up is the site administrator.
+- State: a volume at `/var/lib/reef`. A bind mount must be writable by uid 4920
+  (`chown 4920:4920`), since the container does not run as root.
+- TLS: terminate at a proxy in front, set `REEF_SITE_URL` to the https address and
+  `REEF_HTTP_TRUSTED_PROXIES` to the proxy's address; or mount the certificate and set
+  `REEF_TLS_CERT_FILE` / `REEF_TLS_KEY_FILE`.
 - Readiness: `GET /readyz` on 4920 (200 when the database answers, 503 while draining).
 - `deploy/docker-compose.yml` runs the same with an optional PostgreSQL service.
 
