@@ -8,7 +8,24 @@ use reef_db::auth::SignIn;
 use reef_db::device::Poll;
 use reef_db::repos::{NewRepo, Permission, RepoPatch};
 
-async fn db() -> Db {
+/// On PostgreSQL every test here shares one database and `db()` empties it, so the tests run
+/// one at a time; the guard lives as long as the test's `Db`.
+static SERIAL: tokio::sync::Mutex<()> = tokio::sync::Mutex::const_new(());
+
+struct TestDb {
+    db: Db,
+    _serial: tokio::sync::MutexGuard<'static, ()>,
+}
+
+impl std::ops::Deref for TestDb {
+    type Target = Db;
+    fn deref(&self) -> &Db {
+        &self.db
+    }
+}
+
+async fn db() -> TestDb {
+    let serial = SERIAL.lock().await;
     let url = std::env::var("REEF_TEST_DATABASE_URL").unwrap_or_else(|_| {
         let dir = std::env::temp_dir().join(format!("reef-test-{}", reef_core::token::random_hex(6)));
         format!("sqlite://{}/reef.db", dir.display())
@@ -32,7 +49,7 @@ async fn db() -> Db {
             sqlx::query(sqlx::AssertSqlSafe(format!("DELETE FROM {t}"))).execute(db.pool()).await.unwrap();
         }
     }
-    db
+    TestDb { db, _serial: serial }
 }
 
 #[tokio::test]

@@ -4,9 +4,10 @@ SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
 # Plain builds stamp `git describe --tags` (no --dirty; `-dirty` goes on the commit only),
-# falling back to v0.1.0-dev; releases pass VERSION=v….
-ifeq ($(origin VERSION),undefined)
-VERSION := $(shell git describe --tags 2>/dev/null || echo v0.1.0-dev)
+# falling back to v0.1.0-dev; releases pass VERSION=v…. An empty VERSION (an unset workflow
+# variable) counts as not given.
+ifeq ($(strip $(VERSION)),)
+override VERSION := $(shell git describe --tags 2>/dev/null || echo v0.1.0-dev)
 endif
 PORT          ?= 4920
 SSH_PORT      ?= 4922

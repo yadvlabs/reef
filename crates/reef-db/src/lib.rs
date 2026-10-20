@@ -180,9 +180,18 @@ impl Db {
     async fn check_applied_chain(&self) -> Result<ChainState, Error> {
         use sqlx::migrate::Migrate;
         let mut c = self.pool.acquire().await.map_err(Error::internal)?;
-        c.ensure_migrations_table(&MIGRATOR.table_name).await.map_err(Error::internal)?;
-        let applied = c.list_applied_migrations(&MIGRATOR.table_name).await.map_err(Error::internal)?;
+        // Under the migrator's own lock (an advisory lock on PostgreSQL): two instances starting
+        // against a fresh database would otherwise both create the migrations table at once,
+        // which PostgreSQL refuses with a duplicate-key error on its type catalogue.
+        c.lock().await.map_err(Error::internal)?;
+        let applied = match c.ensure_migrations_table(&MIGRATOR.table_name).await {
+            Ok(()) => c.list_applied_migrations(&MIGRATOR.table_name).await,
+            Err(e) => Err(e),
+        };
+        let unlocked = c.unlock().await;
         drop(c);
+        let applied = applied.map_err(Error::internal)?;
+        unlocked.map_err(Error::internal)?;
         if applied.is_empty() {
             return Ok(ChainState::Fresh);
         }

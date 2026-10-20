@@ -88,6 +88,20 @@ make check          # lint + test, what CI runs before building
 REEF_TEST_DATABASE_URL=postgres://reef:pw@localhost/reef_test make test-rust   # data layer on PostgreSQL too
 ```
 
+A throwaway PostgreSQL for that last line, with no system service involved (Homebrew's
+`postgresql@17` or any distribution package):
+
+```sh
+PG=/opt/homebrew/opt/postgresql@17/bin                       # or wherever initdb and pg_ctl live
+$PG/initdb -D /tmp/reef-pg -U reef --auth=trust -q
+$PG/pg_ctl -D /tmp/reef-pg -o "-p 54329 -k /tmp -c listen_addresses=127.0.0.1" -l /tmp/reef-pg/log start -w
+$PG/createdb -h 127.0.0.1 -p 54329 -U reef reef_test
+REEF_TEST_DATABASE_URL="postgres://reef@127.0.0.1:54329/reef_test?sslmode=disable" cargo test -p reef-db
+$PG/pg_ctl -D /tmp/reef-pg stop -w && rm -rf /tmp/reef-pg
+```
+
+The data-layer tests share that one database, so the ones that empty it run one at a time.
+
 `scripts/e2e.sh` is the smoke test for the basic feature set: sign-up, tokens, repositories,
 push and clone over HTTP and SSH, issues, pull requests and merges, releases, wikis,
 organizations, GraphQL, metrics. It needs only the debug binary, `git`, `ssh` and `python3`,
