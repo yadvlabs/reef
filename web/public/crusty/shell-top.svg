@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   viewBox="0 0 668 576"
+   role="img"
+   aria-labelledby="title"
+   version="1.1"
+   id="svg8"
+   sodipodi:docname="shell-top.svg"
+   width="668"
+   height="576"
+   inkscape:version="1.4 (e7c3feb1, 2024-10-09)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <sodipodi:namedview
+     id="namedview8"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="1.4319444"
+     inkscape:cx="333.81183"
+     inkscape:cy="288.06984"
+     inkscape:window-width="2488"
+     inkscape:window-height="1382"
+     inkscape:window-x="72"
+     inkscape:window-y="30"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg8" />
+  <title
+     id="title">Tortocrab shell, top view</title>
+  <defs
+     id="defs1">
+    <clipPath
+       id="inner">
+      <ellipse
+         cx="320"
+         cy="360"
+         rx="263"
+         ry="309"
+         id="ellipse1" />
+    </clipPath>
+  </defs>
+  <g
+     id="shell-rim"
+     transform="rotate(90,363,331)">
+    <ellipse
+       cx="320"
+       cy="360"
+       rx="288"
+       ry="334"
+       fill="#005b35"
+       id="ellipse2" />
+    <ellipse
+       cx="320"
+       cy="360"
+       rx="276"
+       ry="322"
+       fill="#57b747"
+       id="ellipse3" />
+    <ellipse
+       cx="320"
+       cy="360"
+       rx="263"
+       ry="309"
+       fill="#00683b"
+       id="ellipse4" />
+  </g>
+  <g
+     id="shell-panels"
+     clip-path="url(#inner)"
+     stroke="#006039"
+     stroke-width="13"
+     stroke-linejoin="round"
+     transform="rotate(90,363,331)">
+    <polygon
+       id="top"
+       points="373,205 267,205 222,145 260,46 380,46 418,145 "
+       fill="#35a348" />
+    <polygon
+       id="central"
+       points="390,405 320,444 250,405 221,295 267,205 373,205 419,295 "
+       fill="#248e40" />
+    <polygon
+       id="lower"
+       points="417,510 370,590 270,590 223,510 250,405 320,444 390,405 "
+       fill="#20863b" />
+    <polygon
+       id="bottom"
+       points="230,674 270,590 370,590 410,674 "
+       fill="#329a42" />
+    <polygon
+       id="upper-left"
+       points="221,295 117,271 73,201 124,99 222,145 267,205 "
+       fill="#2da148" />
+    <polygon
+       id="middle-left"
+       points="176,463 66,417 50,327 117,271 221,295 250,405 "
+       fill="#249745" />
+    <polygon
+       id="lower-left"
+       points="270,590 186,638 99,554 66,417 176,463 223,510 "
+       fill="#21893d" />
+    <polygon
+       id="upper-right"
+       points="419,295 523,271 567,201 516,99 418,145 373,205 "
+       fill="#239240" />
+    <polygon
+       id="middle-right"
+       points="464,463 574,417 590,327 523,271 419,295 390,405 "
+       fill="#1b873b" />
+    <polygon
+       id="lower-right"
+       points="370,590 454,638 541,554 574,417 464,463 417,510 "
+       fill="#197c37" />
+  </g>
+  <g
+     id="panel-highlights"
+     fill="#65be4b"
+     opacity="0.65"
+     transform="rotate(90,363,331)">
+    <path
+       d="m 266,66 h 108 l 17,42 q -70,-18 -142,1 z"
+       id="path4" />
+    <path
+       d="m 277,220 h 86 l 19,40 q -62,-19 -124,8 z"
+       id="path5" />
+    <path
+       d="m 132,132 72,27 31,45 -26,26 -83,-24 z"
+       id="path6" />
+    <path
+       d="m 94,302 108,20 9,31 -121,-15 z"
+       id="path7" />
+    <path
+       d="m 269,453 51,21 51,-23 11,35 q -65,-8 -132,11 z"
+       id="path8" />
+  </g>
+  <metadata
+     id="metadata8">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:title>Tortocrab shell, top view</dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+</svg>

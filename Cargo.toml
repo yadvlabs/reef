@@ -1,0 +1,29 @@
+[workspace]
+resolver = "3"
+members = [
+  "crates/reef-core",
+  "crates/reef-db",
+  "crates/reef-git",
+  "crates/reef-api",
+  "crates/reef-actions",
+  "crates/reef-ssh",
+  "bin/reef",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.95"
+license = "MIT"
+publish = false
+repository = "https://github.com/yadvlabs/reef"
+
+[profile.release]
+lto = "fat"
+codegen-units = 1
+strip = true
+
+# Host-side build scripts and proc-macros must not be stripped: macOS 26's dyld refuses a
+# stripped proc-macro dylib ("mis-aligned LINKEDIT string pool"), which breaks cross builds.
+[profile.release.build-override]
+strip = false

@@ -1,0 +1,16 @@
+# Only what deploy/Dockerfile copies is needed; keep local state, secrets and build output out
+# of the build context.
+.git
+.github
+.dev
+data
+dist
+target
+bin/linux-*
+bin/host
+web/node_modules
+web/dist
+web/tsconfig.tsbuildinfo
+docs
+*.md
+.DS_Store

@@ -1,0 +1,45 @@
+# Reef with Docker Compose. Copy next to your data and run `docker compose up -d`, then open
+# http://localhost:4920 and create the first account: it becomes the site administrator.
+#
+# Every setting is a REEF_* variable (deploy/reef.conf.example lists them all), or mount a
+# TOML file at /etc/reef/reef.conf. Stock actions/runner binaries need Reef on port 80 or
+# 443 (they drop the port from --url), so put a reverse proxy in front for CI.
+services:
+  reef:
+    image: yadvlabs/reef:latest
+    restart: unless-stopped
+    ports:
+      - "4920:4920" # HTTP: web UI, API, git over HTTP, runners
+      - "4922:4922" # git over SSH
+    environment:
+      REEF_SITE_URL: http://localhost:4920
+      # Let people create their own accounts (the first account can always be created).
+      REEF_ALLOW_SIGNUP: "false"
+      # PostgreSQL instead of the SQLite file under /var/lib/reef (uncomment the service below):
+      # REEF_DATABASE_URL: postgres://reef@postgres:5432/reef?sslmode=disable
+      # REEF_DATABASE_PASSWORD: change-me
+    volumes:
+      - reef-data:/var/lib/reef
+      # - ./reef.conf:/etc/reef/reef.conf:ro
+    # depends_on:
+    #   postgres:
+    #     condition: service_healthy
+
+  # postgres:
+  #   image: postgres:17
+  #   restart: unless-stopped
+  #   environment:
+  #     POSTGRES_USER: reef
+  #     POSTGRES_PASSWORD: change-me
+  #     POSTGRES_DB: reef
+  #   volumes:
+  #     - postgres-data:/var/lib/postgresql/data
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U reef"]
+  #     interval: 5s
+  #     timeout: 5s
+  #     retries: 10
+
+volumes:
+  reef-data:
+  # postgres-data:

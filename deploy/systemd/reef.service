@@ -1,0 +1,30 @@
+[Unit]
+Description=Reef
+Documentation=https://github.com/yadvlabs/reef
+After=network-online.target postgresql.service
+RequiresMountsFor=/var/lib/reef
+Wants=network-online.target
+
+[Service]
+Type=notify
+User=reef
+Group=reef
+UMask=0077
+ExecStart=/usr/local/bin/reef serve --config /etc/reef/reef.conf
+Restart=always
+RestartSec=2
+TimeoutStartSec=300
+TimeoutStopSec=30
+StateDirectory=reef
+LogsDirectory=reef
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

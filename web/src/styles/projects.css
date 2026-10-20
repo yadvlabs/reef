@@ -1,0 +1,468 @@
+/* Styles owned by the projects feature: header extras, roadmap, insights, workflows, archive, status updates. */
+
+.project-head .project-title {
+  color: inherit;
+  text-decoration: none;
+}
+.project-head .project-title h1 {
+  margin: 0;
+}
+.project-head .icon-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  color: var(--fgColor-muted);
+}
+.project-head .icon-link:hover {
+  background: var(--bgColor-neutral-muted);
+  color: var(--fgColor-default);
+}
+.status-button {
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  display: inline-flex;
+  align-items: center;
+}
+.status-button .add-status {
+  font-size: 12px;
+  color: var(--fgColor-accent);
+  border: 1px solid var(--borderColor-default);
+  border-radius: 999px;
+  padding: 2px 10px;
+  background: var(--bgColor-default);
+}
+.status-button:hover .add-status {
+  background: var(--bgColor-neutral-muted);
+}
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.status-pill.medium {
+  font-size: 14px;
+  padding: 4px 12px;
+}
+.status-pill .dot {
+  width: 8px;
+  height: 8px;
+}
+.status-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+}
+.status-list-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.status-list-head h2 {
+  font-size: 24px;
+  font-weight: 400;
+  margin: 0;
+}
+.status-updates {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.status-update {
+  border: 1px solid var(--borderColor-default);
+  border-radius: var(--borderRadius-medium);
+  padding: 12px 16px;
+}
+.status-update header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.status-dates {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+/* ----- roadmap ----- */
+.roadmap {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 260px);
+}
+.roadmap-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 32px;
+  border-bottom: 1px solid var(--borderColor-default);
+}
+.roadmap-body {
+  display: grid;
+  grid-template-columns: 360px minmax(0, 1fr);
+  flex: 1;
+}
+.roadmap-titles {
+  border-right: 1px solid var(--borderColor-default);
+  background: var(--bgColor-default);
+  min-width: 0;
+}
+.roadmap-head-cell {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--fgColor-muted);
+  border-bottom: 1px solid var(--borderColor-default);
+  background: var(--bgColor-inset);
+  position: relative;
+}
+.roadmap-head-cell.months {
+  padding: 0;
+  overflow: hidden;
+}
+.roadmap-month {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding-left: 8px;
+  border-left: 1px solid var(--borderColor-default);
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+.roadmap-row {
+  position: relative;
+  height: 44px;
+  border-bottom: 1px solid var(--borderColor-muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+  box-sizing: border-box;
+}
+.roadmap-row.title {
+  cursor: pointer;
+}
+.roadmap-row.title:hover {
+  background: var(--bgColor-muted);
+}
+.roadmap-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+}
+.roadmap-lane-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  width: 100%;
+  padding: 0 12px;
+  background: var(--bgColor-muted);
+  border: 0;
+  border-bottom: 1px solid var(--borderColor-default);
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+.roadmap-lane-head.spacer {
+  cursor: default;
+}
+.roadmap-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  position: relative;
+}
+.roadmap-canvas {
+  position: relative;
+  min-height: 100%;
+}
+.roadmap-canvas .roadmap-row {
+  padding: 0;
+  cursor: crosshair;
+}
+.roadmap-days {
+  position: absolute;
+  top: 40px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+}
+.roadmap-day {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-left: 1px solid var(--borderColor-muted);
+}
+.roadmap-day.weekend {
+  background: var(--bgColor-inset);
+}
+.roadmap-today {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--fgColor-accent);
+  z-index: 2;
+  pointer-events: none;
+}
+.roadmap-today::before {
+  content: 'Today';
+  position: absolute;
+  top: 22px;
+  left: 4px;
+  font-size: 10px;
+  color: var(--fgColor-accent);
+  font-weight: 600;
+}
+.roadmap-bar {
+  position: absolute;
+  top: 8px;
+  height: 28px;
+  border-radius: 6px;
+  background: var(--bgColor-accent-muted);
+  border: 1px solid var(--borderColor-accent-emphasis);
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  box-sizing: border-box;
+  cursor: grab;
+  z-index: 3;
+  font-size: 12px;
+  user-select: none;
+}
+.roadmap-bar.dragging {
+  cursor: grabbing;
+  opacity: 0.85;
+}
+.roadmap-bar .bar-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  color: var(--fgColor-default);
+}
+.roadmap-bar.milestone {
+  width: 20px !important;
+  height: 20px;
+  top: 12px;
+  transform: rotate(45deg);
+  padding: 0;
+  border-radius: 3px;
+  background: var(--bgColor-accent-emphasis);
+}
+.roadmap-bar.milestone .bar-label {
+  display: none;
+}
+.roadmap-bar .handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 8px;
+  cursor: ew-resize;
+}
+.roadmap-bar .handle.left {
+  left: 0;
+  border-radius: 6px 0 0 6px;
+}
+.roadmap-bar .handle.right {
+  right: 0;
+  border-radius: 0 6px 6px 0;
+}
+.roadmap-bar .handle:hover {
+  background: var(--bgColor-accent-emphasis);
+}
+
+/* ----- insights ----- */
+.insights-page .insights-head h2 {
+  font-size: 24px;
+  font-weight: 400;
+  margin: 0;
+}
+.insights-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 900px) {
+  .insights-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.chart.burnup {
+  width: 100%;
+  height: auto;
+}
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--fgColor-muted);
+}
+.chart-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.columns-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  height: 200px;
+}
+.columns-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+  min-width: 0;
+}
+.columns-bar {
+  width: 100%;
+  max-width: 48px;
+  border-radius: 4px 4px 0 0;
+  min-height: 2px;
+}
+.columns-value {
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+.columns-label {
+  font-size: 11px;
+  color: var(--fgColor-muted);
+  margin-top: 6px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ----- workflows ----- */
+.workflows-layout {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: 32px;
+}
+@media (max-width: 767px) {
+  .workflows-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.wf-state {
+  font-size: 11px;
+  border-radius: 999px;
+  padding: 0 6px;
+  background: var(--bgColor-neutral-muted);
+  color: var(--fgColor-muted);
+}
+.wf-state.on {
+  background: var(--bgColor-success-muted);
+  color: var(--fgColor-success);
+}
+.workflow-editor {
+  border: 1px solid var(--borderColor-default);
+  border-radius: var(--borderRadius-medium);
+  padding: 16px 24px 24px;
+}
+.workflow-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.workflow-head h2 {
+  font-size: 20px;
+  margin: 0;
+}
+.workflow-step {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 16px;
+  padding: 16px 0;
+  border-top: 1px solid var(--borderColor-default);
+}
+.workflow-step .step-label {
+  font-weight: 600;
+  color: var(--fgColor-muted);
+}
+.workflow-step .step-body p {
+  margin: 0 0 8px;
+}
+
+/* ----- archive ----- */
+.archive-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.archive-head h2 {
+  font-size: 24px;
+  font-weight: 400;
+  margin: 0;
+}
+.archive-bulk {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  margin-top: 12px;
+  background: var(--bgColor-muted);
+  border: 1px solid var(--borderColor-default);
+  border-radius: var(--borderRadius-medium) var(--borderRadius-medium) 0 0;
+}
+.archive-list {
+  border: 1px solid var(--borderColor-default);
+  border-top: 0;
+  border-radius: 0 0 var(--borderRadius-medium) var(--borderRadius-medium);
+}
+.archive-list:empty {
+  display: none;
+}
+.archive-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-top: 1px solid var(--borderColor-default);
+}
+.archive-row:first-child {
+  border-top: 0;
+}
+.archive-row .body {
+  flex: 1;
+  min-width: 0;
+}
+
+/* column headers can be dragged to reorder the status options */
+.column-head.draggable {
+  cursor: grab;
+}
+.column-head.draggable:active {
+  cursor: grabbing;
+}

@@ -1,0 +1,182 @@
+/* Styles owned by the code feature: file tree panel, blob toolbar, line highlighting, blame. */
+.code-view {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+.code-view.panel-open {
+  grid-template-columns: 296px minmax(0, 1fr);
+}
+.code-view.with-aside {
+  grid-template-columns: minmax(0, 1fr) 296px;
+}
+.code-view.panel-open.with-aside {
+  grid-template-columns: 296px minmax(0, 1fr) 296px;
+}
+@media (max-width: 1200px) {
+  .code-view.panel-open.with-aside {
+    grid-template-columns: 296px minmax(0, 1fr);
+  }
+  .code-view.panel-open.with-aside .code-aside {
+    display: none;
+  }
+}
+@media (max-width: 1011px) {
+  .code-view.with-aside {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .code-view.panel-open {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .code-view.panel-open .file-panel {
+    display: none;
+  }
+}
+.code-main {
+  min-width: 0;
+}
+.file-panel {
+  position: sticky;
+  top: 16px;
+  max-height: calc(100vh - 32px);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--borderColor-default);
+  border-radius: var(--borderRadius-medium);
+  background: var(--bgColor-default);
+  overflow: hidden;
+}
+.file-panel-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 8px 8px 16px;
+  border-bottom: 1px solid var(--borderColor-default);
+}
+.file-panel-title {
+  font-weight: 600;
+  font-size: 14px;
+}
+.file-panel-branch {
+  padding: 8px 8px 4px;
+}
+.file-tree {
+  overflow: auto;
+  padding: 4px 8px 8px;
+  font-size: 14px;
+}
+.panel-toggle {
+  flex: 0 0 auto;
+}
+
+/* blob box */
+.blob .blob-header {
+  gap: 8px;
+  padding: 6px 8px 6px 8px;
+}
+.blob .blob-meta {
+  color: var(--fgColor-muted);
+  font-size: 12px;
+  margin-left: 8px;
+  white-space: nowrap;
+}
+.blob table.code td.ln a {
+  color: var(--fgColor-muted);
+  text-decoration: none;
+}
+.blob table.code td.ln a:hover {
+  color: var(--fgColor-accent);
+}
+.blob table.code tr.highlighted td {
+  background: var(--bgColor-attention-muted);
+}
+.blob table.code tr.highlighted td.ln {
+  box-shadow: inset 2px 0 0 var(--borderColor-attention-emphasis);
+}
+.blob table.code td.code-cell {
+  width: 100%;
+}
+.blob table.code tr:target td {
+  background: transparent;
+}
+
+/* blame */
+.blame-table tbody.hunk {
+  border-top: 1px solid var(--borderColor-muted);
+}
+.blame-table td.blame-meta {
+  width: 260px;
+  min-width: 260px;
+  max-width: 260px;
+  vertical-align: top;
+  white-space: normal;
+  border-left: 3px solid transparent;
+  border-right: 1px solid var(--borderColor-default);
+  padding: 2px 8px 2px 10px;
+  font-family: var(--fontStack-sansSerif);
+  font-size: 12px;
+}
+.blame-commit {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  position: sticky;
+  top: 0;
+}
+.blame-summary {
+  color: var(--fgColor-default);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+}
+.blame-author {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--fgColor-muted);
+}
+
+/* Breadcrumbs stay inline with the branch picker even when the file panel narrows the column. */
+.code-main .code-toolbar > nav {
+  flex: 0 1 auto;
+  width: auto;
+  min-width: 0;
+}
+
+/* ----- syntax highlighting (Shiki, GitHub light/dark; colour picked by scheme) ----- */
+.tok,
+code.shiki span,
+.shiki span {
+  color: var(--shiki-light);
+}
+@media (prefers-color-scheme: dark) {
+  .tok,
+  code.shiki span,
+  .shiki span {
+    color: var(--shiki-dark);
+  }
+}
+[data-color-mode='dark'] .tok,
+[data-color-mode='dark'] code.shiki span,
+[data-color-mode='dark'] .shiki span {
+  color: var(--shiki-dark);
+}
+[data-color-mode='light'] .tok,
+[data-color-mode='light'] code.shiki span,
+[data-color-mode='light'] .shiki span {
+  color: var(--shiki-light);
+}
+.shiki,
+code.shiki {
+  background: transparent !important;
+}
+code.shiki .line {
+  display: inline;
+}
+.blob table.code {
+  font-family: var(--fontStack-monospace);
+  font-size: 12px;
+  line-height: 20px;
+}

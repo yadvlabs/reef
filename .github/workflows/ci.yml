@@ -1,0 +1,69 @@
+name: ci
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: reef
+          POSTGRES_PASSWORD: reef-test-only
+          POSTGRES_DB: reef_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U reef"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      # The data-layer tests run against PostgreSQL as well when this is set.
+      REEF_TEST_DATABASE_URL: postgres://reef:reef-test-only@localhost:5432/reef_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.95.0
+        with:
+          components: rustfmt, clippy
+          targets: aarch64-unknown-linux-musl, x86_64-unknown-linux-musl
+      - uses: Swatinem/rust-cache@v2
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: web/pnpm-lock.yaml
+      - name: Tools
+        run: |
+          sudo apt-get update && sudo apt-get install -y --no-install-recommends cmake git-lfs
+          pipx install cargo-zigbuild
+      - run: make web
+      - run: make lint
+      - run: make test
+      - run: make e2e
+      - run: make build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: reef-linux
+          path: bin/linux-*/reef
+          if-no-files-found: error
+  image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build the container image (no push)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: deploy/Dockerfile
+          platforms: linux/amd64
+          push: false
+          tags: reef:ci
+          build-args: REEF_COMMIT=${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

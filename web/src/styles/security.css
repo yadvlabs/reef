@@ -1,0 +1,90 @@
+/* Styles owned by the security feature: layout, overview cards, dependency tables. */
+.security-layout {
+  display: grid;
+  grid-template-columns: 256px minmax(0, 1fr);
+  gap: 32px;
+}
+@media (max-width: 767px) {
+  .security-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.security-main {
+  min-width: 0;
+}
+.security-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.security-head h2 {
+  font-size: 24px;
+  font-weight: 400;
+  margin: 0;
+}
+.security-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid var(--borderColor-default);
+  border-radius: var(--borderRadius-medium);
+  margin-bottom: 12px;
+}
+.security-card-icon {
+  color: var(--fgColor-muted);
+  display: flex;
+}
+.security-card-body {
+  flex: 1;
+  min-width: 0;
+}
+.security-card-body h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 4px;
+}
+.security-card-body p {
+  margin: 0;
+  color: var(--fgColor-muted);
+}
+.security-card-action {
+  flex: 0 0 auto;
+}
+.manifest {
+  border: 1px solid var(--borderColor-default);
+  border-radius: var(--borderRadius-medium);
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+.manifest > header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--bgColor-muted);
+  border-bottom: 1px solid var(--borderColor-default);
+  font-size: 14px;
+}
+.dep-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.dep-table th {
+  text-align: left;
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--fgColor-muted);
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--borderColor-default);
+}
+.dep-table td {
+  padding: 8px 16px;
+  border-top: 1px solid var(--borderColor-muted);
+  vertical-align: middle;
+}
+.dep-table tbody tr:first-child td {
+  border-top: 0;
+}

@@ -1,0 +1,93 @@
+/* Styles owned by the mirror feature: mirrors, imports and Git LFS. */
+.lfs-pointer {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 16px;
+  border-top: 1px solid var(--borderColor-default);
+  color: var(--fgColor-muted);
+}
+.lfs-pointer-body {
+  flex: 1;
+  min-width: 0;
+  color: var(--fgColor-default);
+}
+.lfs-pointer-text {
+  margin: 8px 0 0;
+  white-space: pre;
+  overflow-x: auto;
+}
+.mirror-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+.mirror-status .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--fgColor-muted);
+}
+.mirror-status.ok .dot {
+  background: var(--bgColor-success-emphasis);
+}
+.mirror-status.error .dot {
+  background: var(--bgColor-danger-emphasis);
+}
+.mirror-status.pending .dot {
+  background: var(--bgColor-attention-emphasis);
+}
+.mirror-error {
+  color: var(--fgColor-danger);
+  font-size: 12px;
+  word-break: break-word;
+}
+.import-choice {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border: 1px solid var(--borderColor-default);
+  border-radius: var(--borderRadius-medium);
+  margin-bottom: 16px;
+  color: var(--fgColor-default);
+}
+.import-choice:hover {
+  background: var(--bgColor-muted);
+  text-decoration: none;
+}
+.import-progress {
+  border: 1px solid var(--borderColor-default);
+  border-radius: var(--borderRadius-medium);
+  padding: 24px;
+  text-align: center;
+}
+.import-progress .spinner {
+  width: 32px;
+  height: 32px;
+  margin: 0 auto 12px;
+  border: 3px solid var(--borderColor-default);
+  border-top-color: var(--fgColor-accent);
+  border-radius: 50%;
+  animation: reef-spin 0.9s linear infinite;
+}
+@keyframes reef-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.lfs-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.lfs-table th,
+.lfs-table td {
+  text-align: left;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--borderColor-muted);
+}
+.lfs-table code {
+  font-size: 11px;
+}

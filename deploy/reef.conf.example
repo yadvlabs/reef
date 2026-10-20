@@ -1,0 +1,141 @@
+# TOML
+# Reef configuration reference: every key with its default. Copy to /etc/reef/reef.conf;
+# drop-ins go in /etc/reef/conf.d/*.conf and are merged after this file in sorted order.
+#
+# Every key has an environment twin: REEF_<KEY> for top-level keys and
+# REEF_<SECTION>_<KEY> for sections (arrays comma-separated, booleans true|false|1|0),
+# applied after the files. Unknown keys are an error. Paths are absolute. Secrets are never
+# inline: use the *_file keys, or the env twin that carries the value directly
+# (REEF_DATABASE_PASSWORD, REEF_OIDC_CLIENT_SECRET).
+
+# Primary listener: HTTPS when [tls] is set, plain HTTP otherwise. ":4920" = every interface.
+listen = ":4920"
+# The external URL of this service (clone URLs, API URLs, OIDC callback, cookie security).
+site_url = "http://localhost:4920"
+# Git-over-SSH listener; "" disables SSH.
+ssh_listen = ":4922"
+# Host advertised in ssh:// clone URLs; "" = the host of site_url.
+ssh_host = ""
+# Port advertised in ssh:// clone URLs; 0 = the port of ssh_listen.
+ssh_port = 0
+# REST API root clients use; "" = <site_url>/api/v3. Set to an api. host to mirror api.github.com.
+api_url = ""
+# Additional TCP listeners serving the same application, e.g. ["127.0.0.1:8080"].
+listen_extra = []
+# Unix socket to serve on as well (reverse proxies, local gh); "" = none.
+listen_unix = ""
+# State directory: repositories, hooks, keys, LFS objects, Actions logs, the SQLite file.
+data_dir = "/var/lib/reef"
+# Node id embedded in every generated identifier: 1..15, unique per host.
+node_id = 1
+# Instance name shown in the UI.
+instance_name = "Reef"
+# The git executable.
+git_binary = "git"
+# Let people create accounts themselves (standalone mode only; the first account can always be created).
+allow_signup = false
+
+[tls]
+# PEM certificate chain and key. Both empty = plain HTTP (dev only; refused when site_url is https).
+cert_file = ""
+key_file = ""
+# Reserved for mTLS; a key of its own, not an alias of any other.
+client_ca_file = ""
+
+[database]
+# "postgres://reef@127.0.0.1:5432/reef?sslmode=disable" or "sqlite:///var/lib/reef/reef.db".
+# "" = sqlite://<data_dir>/reef.db.
+url = ""
+# File holding the database password, inserted into url when set. Env twin with the value: REEF_DATABASE_PASSWORD.
+password_file = ""
+
+[log]
+# "json" (default) or "text".
+format = "json"
+# "error", "warn", "info", "debug" or "trace". RUST_LOG overrides it.
+level = "info"
+# When set, e.g. "/var/log/reef/reef.log": a daily rolling file (14 kept) in addition to stderr.
+file = ""
+
+[metrics]
+# When set, e.g. "127.0.0.1:4924": /metrics is served only here (the primary listener answers
+# 404 for it); /healthz and /readyz always stay on the primary listener.
+listen = ""
+
+[http]
+# Reverse proxies (addresses or CIDRs) whose forwarding header is believed for the client
+# address (rate limits, request log remote, sessions), e.g. ["10.0.0.0/8", "127.0.0.1"].
+# Empty: the socket peer is the client and the header is ignored.
+trusted_proxies = []
+# The header those proxies set: "x-forwarded-for" or "forwarded" (RFC 7239).
+forwarded_header = "x-forwarded-for"
+# Accept PROXY protocol v1/v2 on the HTTP(S) listeners from trusted proxies (optional for
+# them); a header from any other peer drops the connection. The SSH listener never accepts it.
+proxy_protocol = false
+
+[auth]
+# "standalone" (default; built-in accounts with passwords, refuses an [oidc] section) or
+# "oidc" (sign-in through the OpenID Connect provider in [oidc]; needs that section).
+mode = "standalone"
+
+# [oidc]
+# # Sign-in through any OpenID Connect provider (authorization code flow with PKCE, discovery
+# # at <issuer>/.well-known/openid-configuration). Required in oidc mode; register
+# # <site_url>/login/oidc/callback as the redirect URI and <site_url>/ as a post-logout URI.
+# issuer = "https://id.example.com"
+# client_id = "reef"
+# # File holding the client secret. Env twin with the value: REEF_OIDC_CLIENT_SECRET.
+# client_secret_file = "/etc/reef/secrets/oidc-client.secret"
+# # PEM bundle trusted for the issuer's certificate; "" = system roots.
+# ca_file = ""
+# # Scopes requested at sign-in.
+# scopes = ["openid", "profile", "email"]
+# # Link an unknown subject to an existing account with the same verified email.
+# link_by_email = false
+# # Name shown on the sign-in button ("Sign in with ...") and in messages.
+# display_name = "SSO"
+# # A boolean ID token claim that makes the person a site administrator when true; "" = none.
+# admin_claim = ""
+# # Former issuer URLs of this same provider (it moved to a new URL; same subjects). Identities
+# # recorded under one are moved to `issuer` on their next sign-in. Never list a different
+# # provider. `reef rekey-issuer --from URL --to URL` does it in bulk.
+# previous_issuers = []
+
+[actions]
+# Where actions not hosted on this Reef are downloaded from (<upstream>/{owner}/{repo}/tar.gz/{ref}).
+upstream = "https://codeload.github.com"
+# Where actions/runner releases are fetched for the download list.
+runner_download_base = "https://github.com/actions/runner/releases/download"
+# How long after completing a workflow run is removed with its logs and artifacts, by an
+# hourly pass on every instance: a duration ("90d", "12h"); "0" keeps everything. The site
+# console's actions_retention_days (whole days) overrides it.
+retention = "90d"
+
+[lfs]
+# Serve the Git LFS batch and transfer API.
+enabled = true
+# Largest object accepted, in bytes (5 GiB).
+max_object_size = 5368709120
+
+[mirror]
+# Allow file:// URLs for mirrors and imports (development and tests only).
+allow_file_urls = false
+# How long a mirror fetch, push or import may run before it is killed ("1h", "30m").
+timeout = "1h"
+
+[network]
+# Let webhooks, mirrors and imports reach loopback, link-local and private addresses.
+allow_private_targets = false
+
+[limits]
+# Largest git push accepted, in bytes (2 GiB), counted after any gzip is undone, over HTTP
+# (413) and SSH.
+max_push_bytes = 2147483648
+# API requests per hour (token bucket, refilled continuously) for an authenticated caller,
+# per user; 429 with X-RateLimit-* and Retry-After above it. 0 = unlimited. Per instance.
+requests_per_hour = 5000
+# The same for unauthenticated callers, per client address. 0 = unlimited.
+unauthenticated_requests_per_hour = 60
+# Signed-out calls from the embedded web UI (same-origin or with the session cookie), per
+# client address. 0 = unlimited.
+web_requests_per_hour = 5000

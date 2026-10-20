@@ -1,0 +1,13 @@
+/target
+/web/node_modules
+/web/dist
+/web/tsconfig.tsbuildinfo
+/data
+/.dev
+*.db
+*.db-*
+.DS_Store
+/web/src/routeTree.gen.ts
+/bin/linux-*
+/bin/host
+/dist
