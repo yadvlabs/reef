@@ -9,7 +9,7 @@ export function NotificationsBell() {
   const unread = session?.unread_notifications ?? 0;
   return (
     <span className="bell">
-      <IconButton icon={BellIcon} aria-label={unread ? `${unread} unread notifications` : 'Notifications'} variant="invisible" onClick={() => navigate({ to: '/notifications', search: {} })} />
+      <IconButton icon={BellIcon} aria-label={unread ? `${unread} unread notifications` : 'Notifications'} variant="default" onClick={() => navigate({ to: '/notifications', search: {} })} />
       {unread ? <span className="bell-dot" /> : null}
     </span>
   );

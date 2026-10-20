@@ -37,7 +37,7 @@ export function AppHeader({ context, dashboard }: { context?: HeaderContext; das
   return (
     <header className="app-header">
       <Link to="/" className="brand" aria-label={instance?.name ?? 'Reef'}>
-        <Logo size={28} />
+        <Logo size={32} />
         {context ? null : <span className="product">{instance?.name ?? 'Reef'}{dashboard ? ' Dashboard' : ''}</span>}
       </Link>
       {context ? (

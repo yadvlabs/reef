@@ -60,7 +60,7 @@ export function BranchMenu({ repo, rev, path, mode }: { repo: Repo; rev: string;
   );
 }
 
-function CopyField({ value }: { value: string }) {
+export function CopyField({ value }: { value: string }) {
   const [copied, setCopied] = useState(false);
   return (
     <div style={{ display: 'flex', gap: 4 }}>

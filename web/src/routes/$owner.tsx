@@ -1,6 +1,6 @@
 import { Avatar, RelativeTime } from '@primer/react';
 import { ButtonLink } from '../components/links';
-import { RepoIcon, PeopleIcon, LocationIcon, LinkIcon, OrganizationIcon, MailIcon, GearIcon, ClockIcon } from '@primer/octicons-react';
+import { PeopleIcon, LocationIcon, LinkIcon, OrganizationIcon, MailIcon, GearIcon, ClockIcon } from '@primer/octicons-react';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute, Link, Outlet, useRouterState } from '@tanstack/react-router';
 import { AppHeader } from '../components/AppHeader';
@@ -8,7 +8,9 @@ import { ContributionGraph } from '../components/ContributionGraph';
 import { ErrorFlash, Loading, NotFound } from '../components/Loading';
 import { accountQuery, orgMembersQuery, OrgsBlock, OwnerTabs, useOwnerRole } from '../components/OwnerTabs';
 import { PinnedRepos } from '../components/Pins';
+import { DEFAULT_FILTER, filterRepos, RepoFilterBar, type RepoFilter } from '../components/RepoFilterBar';
 import { LanguageDot, RepoList } from '../components/RepoList';
+import { useState } from 'react';
 import { api, ApiError, type Repo, type User } from '../lib/api';
 import { projectsQuery } from '../lib/projects';
 
@@ -48,6 +50,8 @@ function Profile({ owner }: { owner: string }) {
 function OrgProfile({ a, current, repos, projects }: { a: User; current: Tab; repos?: Repo[]; projects?: number }) {
   const role = useOwnerRole(a.login);
   const members = useQuery(orgMembersQuery(a.login));
+  const [filter, setFilter] = useState<RepoFilter>(DEFAULT_FILTER);
+  const shown = filterRepos(repos ?? [], filter);
   const langs = topLanguages(repos ?? []);
   const topics = topTopics(repos ?? []);
   return (
@@ -103,24 +107,18 @@ function OrgProfile({ a, current, repos, projects }: { a: User; current: Tab; re
           <PeopleList members={members.data ?? []} />
         ) : current === 'repositories' ? (
           <>
-            {role.member ? (
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
-                <ButtonLink to="/new" search={{ owner: a.login }} variant="primary" size="small" leadingVisual={RepoIcon}>
-                  New repository
-                </ButtonLink>
-              </div>
-            ) : null}
-            <RepoList repos={repos ?? []} empty={`${a.login} doesn't have any public repositories yet.`} />
+            <RepoFilterBar repos={repos ?? []} value={filter} onChange={setFilter} newRepoOwner={a.login} canCreate={role.member} newLabel="New repository" />
+            <RepoList repos={shown} empty={filter.q || filter.type !== 'all' || filter.language ? 'No repository matches.' : `${a.login} doesn't have any public repositories yet.`} />
           </>
         ) : (
           <div className="org-overview">
             <main>
               <PinnedRepos owner={a.login} fallback={repos ?? []} canEdit={role.member} isOrg />
-              {repos?.length ? (
+              {repos?.length || role.member ? (
                 <section style={{ marginTop: 24 }}>
-                  <h2 className="overview-title">Repositories</h2>
-                  <RepoList repos={repos.slice(0, 10)} />
-                  {repos.length > 10 ? (
+                  <RepoFilterBar repos={repos ?? []} value={filter} onChange={setFilter} newRepoOwner={a.login} canCreate={role.member} newLabel="New repository" />
+                  <RepoList repos={shown.slice(0, 10)} empty={filter.q || filter.type !== 'all' || filter.language ? 'No repository matches.' : `${a.login} doesn't have any public repositories yet.`} />
+                  {shown.length > 10 ? (
                     <p style={{ marginTop: 8 }}>
                       <Link to="/$owner" params={{ owner: a.login }} search={{ tab: 'repositories' }}>
                         View all repositories
@@ -252,6 +250,8 @@ function PeopleList({ members }: { members: User[] }) {
 
 function UserProfile({ a, current, repos, projects }: { a: User; current: Tab; repos?: Repo[]; projects?: number }) {
   const role = useOwnerRole(a.login);
+  const [filter, setFilter] = useState<RepoFilter>(DEFAULT_FILTER);
+  const shown = filterRepos(repos ?? [], filter);
   const starred = useQuery({ queryKey: ['account', a.login.toLowerCase(), 'starred'], queryFn: () => api<Repo[]>(`/users/${a.login}/starred?per_page=100`) });
   return (
     <>
@@ -299,14 +299,8 @@ function UserProfile({ a, current, repos, projects }: { a: User; current: Tab; r
             <div style={{ marginTop: 16 }}>
               {current === 'repositories' ? (
                 <>
-                  {role.self ? (
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
-                      <ButtonLink to="/new" search={{ owner: a.login }} variant="primary" size="small" leadingVisual={RepoIcon}>
-                        New
-                      </ButtonLink>
-                    </div>
-                  ) : null}
-                  <RepoList repos={repos ?? []} empty={`${a.login} doesn't have any public repositories yet.`} />
+                  <RepoFilterBar repos={repos ?? []} value={filter} onChange={setFilter} newRepoOwner={a.login} canCreate={role.self} />
+                  <RepoList repos={shown} empty={filter.q || filter.type !== 'all' || filter.language ? 'No repository matches.' : `${a.login} doesn't have any public repositories yet.`} />
                 </>
               ) : current === 'stars' ? (
                 <RepoList repos={starred.data ?? []} showOwner empty={`${a.login} doesn't have any starred repositories yet.`} />

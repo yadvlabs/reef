@@ -266,7 +266,7 @@ function Dashboard() {
               {explore.data?.length === 0 ? <CrustyEmpty mood="builder" size={80} title="No public repositories yet." /> : null}
             </div>
             <div className="muted small" style={{ marginTop: 24, display: 'flex', gap: 8, alignItems: 'center' }}>
-              <Logo size={16} /> Reef {instance?.version ? `v${instance.version}` : ''}
+              <Logo size={16} /> Reef {instance?.version ?? ''}
             </div>
           </aside>
         </div>

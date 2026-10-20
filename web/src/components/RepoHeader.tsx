@@ -1,5 +1,5 @@
-import { ActionList, ActionMenu, Button, Dialog, FormControl, Label, TextInput, UnderlineNav } from '@primer/react';
-import { CodeIcon, IssueOpenedIcon, GitPullRequestIcon, PlayIcon, TableIcon, BookIcon, GearIcon, GraphIcon, ShieldIcon, EyeIcon, RepoForkedIcon, RepoIcon, StarIcon, StarFillIcon, BellSlashIcon, TriangleDownIcon } from '@primer/octicons-react';
+import { ActionList, ActionMenu, Avatar, Button, Dialog, FormControl, Label, TextInput, UnderlineNav } from '@primer/react';
+import { CodeIcon, IssueOpenedIcon, GitPullRequestIcon, PlayIcon, TableIcon, BookIcon, GearIcon, GraphIcon, ShieldIcon, EyeIcon, RepoForkedIcon, StarIcon, StarFillIcon, BellSlashIcon, TriangleDownIcon } from '@primer/octicons-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate, useRouterState } from '@tanstack/react-router';
 import { useState } from 'react';
@@ -7,9 +7,8 @@ import { api, type Repo } from '../lib/api';
 import { useSession } from '../lib/session';
 import { UnderlineNavLink } from './links';
 
-/// The repository header, as on GitHub: the name with its visibility label and the
-/// watch/fork/star actions on one row, the tabs below. The global header carries the
-/// owner/name breadcrumb as well.
+/// The repository tab row, under the global header's owner/name breadcrumb. The name itself,
+/// with the owner's avatar and the watch/fork/star actions, is `RepoTitle` on the code home.
 export function RepoHeader({ repo }: { repo: Repo }) {
   const path = useRouterState({ select: (s) => s.location.pathname });
   const base = `/${repo.owner.login}/${repo.name}`;
@@ -30,22 +29,6 @@ export function RepoHeader({ repo }: { repo: Repo }) {
   ];
   return (
     <div className="repo-header">
-      <div className="title">
-        <span className="repo-icon">
-          <RepoIcon size={16} />
-        </span>
-        <Link to="/$owner/$repo" params={p} className="name">
-          {repo.name}
-        </Link>
-        <Label className="visibility" variant="secondary">
-          {repo.private ? 'Private' : 'Public'}
-        </Label>
-        {repo.archived ? <Label variant="attention">Archived</Label> : null}
-        {repo.is_template ? <Label variant="secondary">Template</Label> : null}
-        <div className="actions">
-          <RepoActions repo={repo} />
-        </div>
-      </div>
       <div className="repo-nav-row">
         <UnderlineNav aria-label="Repository">
           {items
@@ -56,6 +39,30 @@ export function RepoHeader({ repo }: { repo: Repo }) {
               </UnderlineNavLink>
             ))}
         </UnderlineNav>
+      </div>
+    </div>
+  );
+}
+
+/// The repository's name row on the code home, above the branch selector: the owner's avatar,
+/// the name, its visibility, and watch / fork / star on the right, ending with the About column.
+export function RepoTitle({ repo }: { repo: Repo }) {
+  const p = { owner: repo.owner.login, repo: repo.name };
+  return (
+    <div className="repo-title-row">
+      <Link to="/$owner" params={{ owner: repo.owner.login }} className="owner-avatar" aria-label={repo.owner.login}>
+        <Avatar src={repo.owner.avatar_url} size={24} square={repo.owner.type === 'Organization'} alt="" />
+      </Link>
+      <Link to="/$owner/$repo" params={p} className="name">
+        {repo.name}
+      </Link>
+      <Label className="visibility" variant="secondary">
+        {repo.private ? 'Private' : 'Public'}
+      </Label>
+      {repo.archived ? <Label variant="attention">Archived</Label> : null}
+      {repo.is_template ? <Label variant="secondary">Template</Label> : null}
+      <div className="actions">
+        <RepoActions repo={repo} />
       </div>
     </div>
   );
