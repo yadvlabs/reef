@@ -42,7 +42,7 @@ jobs:
       - name: Tools
         run: |
           sudo apt-get update && sudo apt-get install -y --no-install-recommends cmake git-lfs
-          pipx install cargo-zigbuild
+          pip3 install --break-system-packages cargo-zigbuild   # the wheel depends on ziglang, which cargo-zigbuild finds through python3
       - run: make web
       - run: make lint
       - run: make test

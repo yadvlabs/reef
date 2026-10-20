@@ -41,8 +41,8 @@ COPY bin/ bin/
 COPY crates/ crates/
 COPY deploy/systemd/ deploy/systemd/
 COPY --from=web /src/web/dist web/dist
-RUN --mount=type=cache,target=/usr/local/cargo/registry \
-    --mount=type=cache,target=/usr/local/cargo/git \
+RUN --mount=type=cache,target=/usr/local/cargo/registry,id=reef-registry-${TARGETARCH} \
+    --mount=type=cache,target=/usr/local/cargo/git,id=reef-git-${TARGETARCH} \
     --mount=type=cache,target=/src/target,id=reef-target-${TARGETARCH} \
     t=$(cat /rust-target) \
  && cargo zigbuild --locked --release --target "$t" --bin reef \

@@ -1,12 +1,23 @@
-# Tag a release (`git tag v0.7.1 && git push origin v0.7.1`; the Cargo version must match) and
+# Tag a release (`git tag v0.1.0 && git push origin v0.1.0`; the Cargo version must match) and
 # this publishes the binaries on the GitHub release and the multi-arch image on Docker Hub.
 # Secrets: DOCKERHUB_USERNAME and DOCKERHUB_TOKEN (a Docker Hub access token with write scope).
+# "Run workflow" on a branch is a dry run: it builds the tarballs and the multi-arch image
+# without creating a release or pushing, unless `publish` is ticked.
 name: release
 on:
   push:
     tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: "Also push the image to Docker Hub"
+        type: boolean
+        default: false
 permissions:
   contents: write
+env:
+  # A tag names the version; a manual run builds a -dev pre-release of the Cargo version.
+  VERSION: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
 jobs:
   binaries:
     runs-on: ubuntu-latest
@@ -27,9 +38,15 @@ jobs:
       - name: Tools
         run: |
           sudo apt-get update && sudo apt-get install -y --no-install-recommends cmake
-          pipx install cargo-zigbuild
-      - run: make release VERSION=${{ github.ref_name }}
-      - uses: softprops/action-gh-release@v2
+          pip3 install --break-system-packages cargo-zigbuild   # the wheel depends on ziglang, which cargo-zigbuild finds through python3
+      - run: make release ${VERSION:+VERSION=$VERSION}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: reef-${{ github.ref_name }}
+          path: dist/*
+          if-no-files-found: error
+      - if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v2
         with:
           files: |
             dist/*.tar.gz
@@ -41,7 +58,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
-      - uses: docker/login-action@v3
+      - if: github.ref_type == 'tag' || inputs.publish
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -52,16 +70,17 @@ jobs:
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
+            type=ref,event=branch
       - uses: docker/build-push-action@v6
         with:
           context: .
           file: deploy/Dockerfile
           platforms: linux/amd64,linux/arm64
-          push: true
+          push: ${{ github.ref_type == 'tag' || inputs.publish == true }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
             REEF_COMMIT=${{ github.sha }}
-            REEF_VERSION=${{ github.ref_name }}
+            REEF_VERSION=${{ env.VERSION }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
